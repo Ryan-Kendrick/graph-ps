@@ -29,3 +29,43 @@
 # ----------
 # $continue = Read-Host "Adding $users to $groups, press y to continue or n to cancel"
 # $groupId = Get-MgGroup -Filter "DisplayName eq 'Leadership Team'"
+
+# get-mggroup -filter "DisplayName eq 'tg-3'"
+
+Connect-MgGraph -NoWelcome -Scopes GroupMember.ReadWrite.All, User.Read.All
+
+$users = "ryan.kendrick93@gmail.com", "Ryan@givecredit.onmicrosoft.com", "RyanK@give-credit.co.nz", "fleeterson@gmail.com"
+$groups = "TG-1", "TG-2", "TG-3", "TG-4"
+$userIds = @()
+$groupIds = @()
+
+foreach ($user in $users) {
+    $thisId = (Get-MgUser -Filter "mail eq '$user'").Id
+    if (($null -ne $thisId) -and ($thisId -is [string])) {
+        $userIds += $thisId
+    } else {
+        Throw "User `"$user`" not found, operation aborted"
+    } 
+}
+
+foreach ($group in $groups) {
+    $thisId = (Get-MgGroup -Filter "DisplayName eq '$group'").Id
+    if (($null -ne $thisId) -and ($thisId -is [string])) {
+        $groupIds += $thisId
+    } else {
+        Throw "Group `"$group`" not found, operation aborted"
+    } 
+}
+
+foreach ($groupId in $GroupIds) {
+    Get-MgGroup -Filter "Id eq '$groupId'"
+    foreach ($userId in $userIds) {
+        New-MgGroupMember -GroupId "$groupId" -DirectoryObjectId "$userId"
+    }
+    Get-MgGroup -Filter "Id eq '$groupId'"
+}
+
+
+
+Write-Host "$userIds"
+Write-Host "$groupIds"
