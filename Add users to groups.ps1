@@ -10,8 +10,8 @@ function Add-UsersToGroups {
 
     $userIds = @()
     $groupIds = @()
-    Write-Host "Users type is $users.GetType().Name"
-    Write-Host "Groups type is $groups.GetType().Name"
+    Write-Host "Users type is $($users.GetType().Name)"
+    Write-Host "Groups type is $($groups.GetType().Name)"
     Write-Host "Users state before arrayification is $users"
     Write-Host "Groups state before arrayification is $groups"
 
@@ -23,8 +23,10 @@ function Add-UsersToGroups {
         }
         $arr
     } 
+    
+    Write-Host "Users state after arrayification is $($users.GetType().Name) $users"
+    Write-Host "Groups state after arrayification is $($groups.GetType().Name) $groups"
  
-
 
     foreach ($user in $users) {
         $thisId = (Get-MgUser -Filter "mail eq '$user'").Id
@@ -52,7 +54,7 @@ function Add-UsersToGroups {
             New-MgGroupMember -GroupId "$groupId" -DirectoryObjectId "$userId"
         }
     }
-    
+
 }
 
 Connect-MgGraph -NoWelcome -Scopes GroupMember.ReadWrite.All, User.Read.All
