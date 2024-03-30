@@ -10,25 +10,20 @@ function Add-UsersToGroups {
 
     $userIds = @()
     $groupIds = @()
-    Write-Host $users.GetType().Name
-    Write-Host $groups.GetType().Name
-    Write-Host $users
-    Write-Host $groups
+    Write-Host "Users type is $users.GetType().Name"
+    Write-Host "Groups type is $groups.GetType().Name"
+    Write-Host "Users state before arrayification is $users"
+    Write-Host "Groups state before arrayification is $groups"
 
-    # function Change-StringToArray {
-    #     param (
-    #         $str
-    #     )
-
-    # }
-    # for ($i = 0; $i -lt 2; $i++) {
-    #     $csv = @($users, $groups)[$i]
-    #     $csvToArr = @()
-    #     if ($csv | Select-String -Pattern ",") {
-    #         $csvToArr += $csv -split ','
-    #         $csvToArr = $csvToArr.Trim()
-    #     }
-    # } 
+ 
+    $users, $groups = @($users, $groups) | ForEach-Object {
+        if ($_ | Select-String -Pattern ",") {
+            $arr = $_ -split ','
+            $arr = $arr.Trim()
+        }
+        $arr
+    } 
+ 
 
 
     foreach ($user in $users) {
@@ -49,18 +44,17 @@ function Add-UsersToGroups {
         } 
     }
 
-    Write-Host $userIds
-    Write-Host $groupIds
+    Write-Host "Users after idification is $userIds"
+    Write-Host "Groups after idification is $groupIds"
 
     foreach ($groupId in $GroupIds) {
         foreach ($userId in $userIds) {
             New-MgGroupMember -GroupId "$groupId" -DirectoryObjectId "$userId"
         }
     }
-
-    Write-Host "$userIds"
-    Write-Host "$groupIds"
-
+    
 }
 
 Connect-MgGraph -NoWelcome -Scopes GroupMember.ReadWrite.All, User.Read.All
+
+# this script NEEDS to be able to handle group already exists situations - try-catch?
