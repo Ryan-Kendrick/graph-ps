@@ -18,7 +18,9 @@ function Add-UsersToGroups {
  
     $users, $groups = @($users, $groups) | ForEach-Object {
         if ($_ | Select-String -Pattern ",") {
+            Write-host "$_"
             $arr = $_ -split ','
+            write-host $arr
             $arr = $arr.Trim()
         }
         $arr
