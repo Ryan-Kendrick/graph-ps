@@ -1,9 +1,9 @@
-function Add-UsersToGroups {
+function Remove-UsersFromGroups {
     param (
-        [Parameter(Mandatory = $true, Position = 1, HelpMessage = "Comma separated list of email addresses to add. Must be in quotes")]
+        [Parameter(Mandatory = $true, Position = 1, HelpMessage = "Comma separated list of email addresses to remove. Must be in quotes")]
         [ValidateNotNullOrEmpty()]
         $users,
-        [Parameter(Mandatory = $true, Position = 2, HelpMessage = "Comma separated list of groups to add. Must be in quotes")]
+        [Parameter(Mandatory = $true, Position = 2, HelpMessage = "Comma separated list of groups to remove. Must be in quotes")]
         [ValidateNotNullOrEmpty()]
         $groups
     )
@@ -14,9 +14,7 @@ function Add-UsersToGroups {
 
     for ($i = 0; $i -lt $params.Length; $i++) {
         if ($params[$i] | Select-String -Pattern ",") {
-            Write-host $params[$i]
             $arr = $params[$i] -split ','
-            write-host $arr
             $arr = $arr.Trim()
         }
         $params[$i] = $arr ? $arr : $params[$i]
@@ -43,9 +41,9 @@ function Add-UsersToGroups {
     foreach ($groupId in $GroupIds) {
         foreach ($userId in $userIds) {
             try {
-                New-MgGroupMember -GroupId "$groupId" -DirectoryObjectId "$userId" -ErrorAction Stop
+                Remove-MgGroupMemberByRef -GroupId "$groupId" -DirectoryObjectId "$userId" -ErrorAction Stop
             } catch {
-                Write-Host "User $userId already exists in Group $groupId"
+                Write-Host "User $userId does not exist in Group $groupId"
             }
         }
     }
