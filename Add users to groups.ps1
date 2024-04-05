@@ -1,36 +1,28 @@
 function Add-UsersToGroups {
     param (
-        [Parameter(Mandatory = $true, Position = 1, HelpMessage = "Comma separated list of the users to add")]
+        [Parameter(Mandatory = $true, Position = 1, HelpMessage = "Comma separated list of email addresses to add. Must be surrounded by quotes")]
         [ValidateNotNullOrEmpty()]
         $users,
-        [Parameter(Mandatory = $true, Position = 2, HelpMessage = "Comma separated list of the groups to add")]
+        [Parameter(Mandatory = $true, Position = 2, HelpMessage = "Comma separated list of the groups to add. Must be surrounded by quotes")]
         [ValidateNotNullOrEmpty()]
         $groups
     )
 
     $userIds = @()
     $groupIds = @()
-    Write-Host "Users type is $($users.GetType().Name)"
-    Write-Host "Groups type is $($groups.GetType().Name)"
-    Write-Host "Users state before arrayification is $users"
-    Write-Host "Groups state before arrayification is $groups"
+    $params = @($users, $groups)
 
- 
-    $users, $groups = @($users, $groups) | ForEach-Object {
-        if ($_ | Select-String -Pattern ",") {
-            Write-host "$_"
-            $arr = $_ -split ','
+    for ($i = 0; $i -lt $params.Length; $i++) {
+        if ($params[$i] | Select-String -Pattern ",") {
+            Write-host $params[$i]
+            $arr = $params[$i] -split ','
             write-host $arr
             $arr = $arr.Trim()
         }
-        $arr
+        $params[$i] = $arr ? $arr : $params[$i]
     } 
-    
-    Write-Host "Users state after arrayification is $($users.GetType().Name) $users"
-    Write-Host "Groups state after arrayification is $($groups.GetType().Name) $groups"
- 
-
-    foreach ($user in $users) {
+     
+    foreach ($user in $params[0]) {
         $thisId = (Get-MgUser -Filter "mail eq '$user'").Id
         if (($null -ne $thisId) -and ($thisId -is [string])) {
             $userIds += $thisId
@@ -39,7 +31,7 @@ function Add-UsersToGroups {
         } 
     }
 
-    foreach ($group in $groups) {
+    foreach ($group in $params[1]) {
         $thisId = (Get-MgGroup -Filter "DisplayName eq '$group'").Id
         if (($null -ne $thisId) -and ($thisId -is [string])) {
             $groupIds += $thisId
@@ -48,12 +40,13 @@ function Add-UsersToGroups {
         } 
     }
 
-    Write-Host "Users after idification is $userIds"
-    Write-Host "Groups after idification is $groupIds"
-
     foreach ($groupId in $GroupIds) {
         foreach ($userId in $userIds) {
-            New-MgGroupMember -GroupId "$groupId" -DirectoryObjectId "$userId"
+            try {
+                New-MgGroupMember -GroupId "$groupId" -DirectoryObjectId "$userId" -ErrorAction Stop
+            } catch {
+                Write-Host "User $userId already exists in Group $groupId"
+            }
         }
     }
 
