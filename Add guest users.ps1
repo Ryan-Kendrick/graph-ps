@@ -1,4 +1,4 @@
-function Remove-UsersFromGroups {
+function Add-GuestUsers {
     param (
         [Parameter(Mandatory = $true, Position = 1, HelpMessage = "Comma separated list of names to add. Must be in quotes")]
         [ValidateNotNullOrEmpty()]
@@ -7,7 +7,7 @@ function Remove-UsersFromGroups {
         [ValidateNotNullOrEmpty()]
         $email
     )
-
+    $paramNames = @("Name", "Email")
     $params = @($name, $email)
 
     for ($i = 0; $i -lt $params.Length; $i++) {
@@ -28,10 +28,22 @@ function Remove-UsersFromGroups {
 
     $confirmationTable = @()
 
-    foreach ($param in $params) {
-        
-    }
-    # Need a length check
+    for ($i = 0; $i -lt $params.Length; $i++) {
+        $thisParam = $paramNames[$i]
+        for ($j = 0; $j -lt $params[$i][$j].Length; $j++) {
+            $thisUser = [ordered]@{}
+            for ($k = 0; $k -lt $params.Length; $k++) {
+                $thisUser.$thisParam = $params[$k][$j]
+            }
+            $confirmationTable += $thisUser
+        }
+     }
+     
+    Write-Host $confirmationTable
+    Write-Host $confirmationTable[0].gettype().name
+    Write-Host $confirmationTable[1]
+
+
     # Need confirmation dialogue - array of hash tables > name: [name] email: [email]
 }
 
