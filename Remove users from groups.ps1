@@ -50,4 +50,4 @@ function Remove-UsersFromGroups {
 
 }
 
-Connect-MgGraph -NoWelcome -Scopes GroupMember.ReadWrite.All, User.Read.All
+Connect-MgGraph -Scopes GroupMember.ReadWrite.All, User.Read.All

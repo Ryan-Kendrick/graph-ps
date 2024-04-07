@@ -52,4 +52,4 @@ function Add-UsersToGroups {
 
 }
 
-Connect-MgGraph -NoWelcome -Scopes GroupMember.ReadWrite.All, User.Read.All
+Connect-MgGraph -Scopes GroupMember.ReadWrite.All, User.Read.All

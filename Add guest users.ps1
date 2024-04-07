@@ -3,7 +3,7 @@ function Add-GuestUsers {
         [Parameter(Mandatory = $true, Position = 1, HelpMessage = "Comma separated list of names to add. Must be in quotes")]
         [ValidateNotNullOrEmpty()]
         $displayName,
-        [Parameter(Mandatory = $true, Position = 2, HelpMessage = "Comma separated list of email addresses to send guest invitations. Must be in quotes")]
+        [Parameter(Mandatory = $true, Position = 2, HelpMessage = "Comma separated list of email addresses to send guest invitations to. Must be in quotes")]
         [ValidateNotNullOrEmpty()]
         $email
     )
@@ -11,11 +11,11 @@ function Add-GuestUsers {
     $params = @($displayName, $email)
 
     for ($i = 0; $i -lt $params.Length; $i++) {
-        if ($params[$i] | Select-String -Pattern ",") {
+        if (($params[$i] | Select-String -Pattern ",") -and ($null -ne $params[$i][$params[$i].IndexOf(",")+1])) {
             $arr = $params[$i] -split ','
             $arr = $arr.Trim()
         } else {
-            Throw "Comma separated list not provided"
+            Throw "A required comma separated list was not provided"
         }
         $params[$i] = $arr ? $arr : $params[$i]
     } 
@@ -33,22 +33,30 @@ function Add-GuestUsers {
             $thisUser.$thisParam = $params[$j][$i]
         }
         $confirmationTable += $thisUser
-     }
-     
-   $confirmationTable | Format-Table -AutoSize | Out-Host
+    }
+        
+    $confirmationTable | Format-Table -AutoSize | Out-Host
+    $proceed = Read-Host "Enter 'y' to invite these users"
 
-   $messageInfo = @{CustomizedMessageBody = "Hello. You are invited to the Contoso organization."}
-
-   foreach ($invitee in $confirmationTable) {
-    New-MgInvitation `
-    -InviteRedirectUrl "https://myapps.microsoft.com" `
-    -InvitedUserDisplayName $invitee["Display name"] `
-    -InvitedUserEmailAddress $invitee["Email address"] `
-    -InvitedUserMessageInfo $messageInfo `
-    -SendInvitationMessage
-   }
+    write-host $proceed
+    if ($proceed -match '(?i)y') {
+        $messageInfo = @{CustomizedMessageBody = "Hello. You are invited to the Contoso organization."}
+        foreach ($invitee in $confirmationTable) {
+            if (($($invitee["Display name"])) -and ($null -ne $invitee["Display name"][$invitee["Display name"].IndexOf(" ")+1])) {
+            Write-host "Inviting $($invitee["Display name"])"
+            New-MgInvitation `
+            -InviteRedirectUrl "https://myapps.microsoft.com" `
+            -InvitedUserDisplayName $invitee["Display name"] `
+            -InvitedUserEmailAddress $invitee["Email address"] `
+            -InvitedUserMessageInfo $messageInfo `
+            -SendInvitationMessage
+            } else {
+                Throw "$($invitee["Email address"]) lacks a valid display name"
+            }
+        }
+    } else {
+            Write-Host "Operation aborted by user"
+    }
 }
 
 Connect-MgGraph -Scopes 'User.ReadWrite.All'
-
-# Add confirmation prompt
