@@ -13,13 +13,11 @@ function Add-UsersToGroups {
     $params = @($users, $groups)
 
     for ($i = 0; $i -lt $params.Length; $i++) {
-        if ($params[$i] | Select-String -Pattern ",") {
-            Write-host $params[$i]
+        if ($null -ne ($params[$i] | Select-String -Pattern ",")) {
             $arr = $params[$i] -split ','
-            write-host $arr
             $arr = $arr.Trim()
-        }
-        $params[$i] = $arr ? $arr : $params[$i]
+            $params[$i] = $arr
+        } 
     } 
      
     foreach ($user in $params[0]) {
@@ -46,6 +44,8 @@ function Add-UsersToGroups {
                 New-MgGroupMember -GroupId "$groupId" -DirectoryObjectId "$userId" -ErrorAction Stop
             } catch {
                 Write-Host "User $userId already exists in Group $groupId"
+            } finally {
+                Write-Host "Done"
             }
         }
     }

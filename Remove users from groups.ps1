@@ -13,11 +13,11 @@ function Remove-UsersFromGroups {
     $params = @($users, $groups)
 
     for ($i = 0; $i -lt $params.Length; $i++) {
-        if ($params[$i] | Select-String -Pattern ",") {
+        if ($null -ne ($params[$i] | Select-String -Pattern ",")) {
             $arr = $params[$i] -split ','
             $arr = $arr.Trim()
-        }
-        $params[$i] = $arr ? $arr : $params[$i]
+            $params[$i] = $arr
+        } 
     } 
      
     foreach ($user in $params[0]) {
@@ -44,6 +44,8 @@ function Remove-UsersFromGroups {
                 Remove-MgGroupMemberByRef -GroupId "$groupId" -DirectoryObjectId "$userId" -ErrorAction Stop
             } catch {
                 Write-Host "User $userId does not exist in Group $groupId"
+            } finally {
+                Write-Host "Done"
             }
         }
     }
