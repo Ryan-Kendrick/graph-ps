@@ -44,11 +44,11 @@ function Remove-UsersFromGroups {
                 Remove-MgGroupMemberByRef -GroupId "$groupId" -DirectoryObjectId "$userId" -ErrorAction Stop
             } catch {
                 Write-Host "User $userId does not exist in Group $groupId"
-            } finally {
-                Write-Host "Done"
             }
         }
     }
+
+    Write-Host "Done"
 
 }
 

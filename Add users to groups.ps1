@@ -44,12 +44,12 @@ function Add-UsersToGroups {
                 New-MgGroupMember -GroupId "$groupId" -DirectoryObjectId "$userId" -ErrorAction Stop
             } catch {
                 Write-Host "User $userId already exists in Group $groupId"
-            } finally {
-                Write-Host "Done"
             }
         }
     }
 
+    Write-Host "Done"
+    
 }
 
 Connect-MgGraph -Scopes GroupMember.ReadWrite.All, User.Read.All
