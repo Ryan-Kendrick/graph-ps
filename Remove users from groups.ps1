@@ -38,7 +38,7 @@ function Remove-UsersFromGroups {
         } 
     }
 
-    foreach ($groupId in $GroupIds) {
+    foreach ($groupId in $groupIds) {
         foreach ($userId in $userIds) {
             try {
                 Remove-MgGroupMemberByRef -GroupId "$groupId" -DirectoryObjectId "$userId" -ErrorAction Stop

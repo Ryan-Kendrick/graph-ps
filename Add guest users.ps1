@@ -10,7 +10,7 @@ function Add-GuestUsers {
     $paramNames = @("Display name", "Email address")
     $params = @($displayName, $email)
 
-    for ($i = 0; $i -lt $params.Length; $i++) {
+    for ($i = 0; $i -lt $params.Length; $i++) { # Separate each user property into an array, each element representing a different user
         if (($params[$i] | Select-String -Pattern ",") -and ($null -ne $params[$i][$params[$i].IndexOf(",")+1])) {
             $arr = $params[$i] -split ','
             $arr = $arr.Trim()
@@ -20,9 +20,14 @@ function Add-GuestUsers {
         $params[$i] = $arr ? $arr : $params[$i]
     } 
 
-    if ($params[0].Length -ne $params[1].Length) {
+    if ($params[0].Length -ne $params[1].Length) { #Validate email addresses
         Throw "The length of the list of display names and email addresses must be equal"
     }
+    foreach ($email in $params['email']) {
+
+    }
+
+    $ar1, $ar2 = $params 
 
     $confirmationTable = @()
 
@@ -38,7 +43,6 @@ function Add-GuestUsers {
     $confirmationTable | Format-Table -AutoSize | Out-Host
     $proceed = Read-Host "Enter 'y' to invite these users"
 
-    write-host $proceed
     if ($proceed -match '(?i)y') {
         $messageInfo = @{CustomizedMessageBody = "Hello. You are invited to the Contoso organization."}
         foreach ($invitee in $confirmationTable) {
@@ -60,3 +64,6 @@ function Add-GuestUsers {
 }
 
 Connect-MgGraph -Scopes 'User.ReadWrite.All'
+
+# add regex [a-z0-9\._%+!$&*=^|~#%'`?{}\/\-]+@([a-z0-9\-]+\.){1,}([a-z]{2,16})\
+# add params for jobtitle, department, companyname, manager

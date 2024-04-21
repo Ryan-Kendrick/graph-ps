@@ -38,7 +38,7 @@ function Add-UsersToGroups {
         } 
     }
 
-    foreach ($groupId in $GroupIds) {
+    foreach ($groupId in $groupIds) {
         foreach ($userId in $userIds) {
             try {
                 New-MgGroupMember -GroupId "$groupId" -DirectoryObjectId "$userId" -ErrorAction Stop
