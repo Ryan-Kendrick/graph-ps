@@ -14,6 +14,13 @@ function Add-GuestUsers {
         if (($params[$i] | Select-String -Pattern ",") -and ($null -ne $params[$i][$params[$i].IndexOf(",")+1])) {
             $arr = $params[$i] -split ','
             $arr = $arr.Trim()
+            if ($i -eq 0) {
+                foreach ($namePair in $arr) {
+                    if  (!$namePair.IndexOf(' ')+1) {
+                        Throw "$namePair is not a valid name"
+                    }
+                }
+            }
         } else {
             Throw "A required comma separated list was not provided"
         }
@@ -24,7 +31,9 @@ function Add-GuestUsers {
         Throw "The length of the list of display names and email addresses must be equal"
     }
     foreach ($email in $params['email']) {
-
+        if ($email -match "[a-z0-9\._%+!$&*=^|~#%'`?{}\/\-]+@([a-z0-9\-]+\.){1,}([a-z]{2,16})\") {
+            Throw "$email is not a valid email address"
+        }
     }
 
     $ar1, $ar2 = $params 
@@ -46,7 +55,7 @@ function Add-GuestUsers {
     if ($proceed -match '(?i)y') {
         $messageInfo = @{CustomizedMessageBody = "Hello. You are invited to the Contoso organization."}
         foreach ($invitee in $confirmationTable) {
-            if (($($invitee["Display name"])) -and ($null -ne $invitee["Display name"][$invitee["Display name"].IndexOf(" ")+1])) {
+            Write-Host "$($invitee["Display name"][1])"
             Write-host "Inviting $($invitee["Display name"])"
             New-MgInvitation `
             -InviteRedirectUrl "https://myapps.microsoft.com" `
@@ -54,9 +63,6 @@ function Add-GuestUsers {
             -InvitedUserEmailAddress $invitee["Email address"] `
             -InvitedUserMessageInfo $messageInfo `
             -SendInvitationMessage
-            } else {
-                Throw "$($invitee["Email address"]) lacks a valid display name"
-            }
         }
     } else {
             Write-Host "Operation aborted by user"
@@ -65,5 +71,6 @@ function Add-GuestUsers {
 
 Connect-MgGraph -Scopes 'User.ReadWrite.All'
 
-# add regex [a-z0-9\._%+!$&*=^|~#%'`?{}\/\-]+@([a-z0-9\-]+\.){1,}([a-z]{2,16})\
+# fix regex
+# fix multiple names check
 # add params for jobtitle, department, companyname, manager
