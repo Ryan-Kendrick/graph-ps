@@ -58,17 +58,21 @@ function Add-GuestUsers {
     $confirmationTable | Format-Table -AutoSize | Out-Host
     $proceed = Read-Host "Enter 'y' to invite these users"
 
+   
+
     if ($proceed -match '(?i)y') {
         $messageInfo = @{CustomizedMessageBody = "Hello. You are invited to the Contoso organization."}
         foreach ($invitee in $confirmationTable) {
-            Write-Host "$($invitee["Display name"][1])"
-            Write-host "Sending invitation for $($invitee["Display name"]) to $($invitee["Email address"])"
-            New-MgInvitation `
-            -InviteRedirectUrl "https://myapps.microsoft.com" `
-            -InvitedUserDisplayName $invitee["Display name"] `
-            -InvitedUserEmailAddress $invitee["Email address"] `
-            -InvitedUserMessageInfo $messageInfo `
-            -SendInvitationMessage
+            Write-host "Sending invitation to $($invitee["Display name"]) at $($invitee["Email address"])"
+            $invBody = @{
+                'InviteRedirectUrl' = "https://myapps.microsoft.com"
+                'InvitedUserMessageInfo' = "$messageInfo"
+                'InvitedUserDisplayName' = "$($invitee["Display name"])"
+                'InvitedUserEmailAddress' = "$($invitee["Email address"])"
+                'SendInvitationMessage' = $true
+            }
+            $thisUser = New-MgInvitation -BodyParameter $invBody
+            write-host $thisUser.id
         }
     } else {
             Write-Host "Operation aborted by user"
@@ -78,3 +82,11 @@ function Add-GuestUsers {
 Connect-MgGraph -Scopes 'User.ReadWrite.All'
 
 # add params for jobtitle, department, companyname, manager
+# $params = @{
+# 	companyName = "Microsoft"
+# 	usageLocation = "US"
+# }
+
+# $userId = 'xxxxxxxxxxxxxxxxx'
+
+# Update-MgUser -UserId $userId -BodyParameter $params
