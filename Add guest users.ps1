@@ -53,13 +53,30 @@ function Add-GuestUsers {
         }
         $confirmationTable += $thisUser
     }
-
+    
     # Prompt user for confirmation
     $confirmationTable | Format-Table -AutoSize | Out-Host
     $proceed = Read-Host "Enter 'y' to invite these users"
+    
+    # Prompt user for properties
+    Write-Host "Enter the required properties for a new guest user"
+    $jobTitle = Read-Host "Job title"
+    $companyName = Read-Host "Company name"
+    $department = Read-Host "Department"
+    $managerEmail = Read-Host "Manager email address"
+    $managerId = Get-MgUser -ErrorAction Stop -Filter "mail eq '$managerEmail'" | Select-Object -ExpandProperty Id
+    if ($null -eq $managerId) {
+        Throw "Manager not found for $managerEmail"
+    }
 
-   
-
+    $props = @{
+        jobTitle = $jobTitle
+        companyName = $companyName
+        department = $department
+        usageLocation = 'NZ'
+    }
+    
+    # Create users
     if ($proceed -match '(?i)y') {
         $messageInfo = @{CustomizedMessageBody = "Hello. You are invited to the Contoso organization."}
         foreach ($invitee in $confirmationTable) {
@@ -71,8 +88,9 @@ function Add-GuestUsers {
                 'InvitedUserEmailAddress' = "$($invitee["Email address"])"
                 'SendInvitationMessage' = $true
             }
-            $thisUser = New-MgInvitation -BodyParameter $invBody
-            write-host $thisUser.id
+            $newGuest = New-MgInvitation -BodyParameter $invBody
+            Update-MgUser -UserId $newGuest.InvitedUser.Id -BodyParameter $props
+            Set-MgUserManagerByRef -UserId $newGuest.InvitedUser.Id -BodyParameter @{'@odata.id' = "https://graph.microsoft.com/v1.0/users/$managerId"}
         }
     } else {
             Write-Host "Operation aborted by user"
@@ -81,12 +99,3 @@ function Add-GuestUsers {
 
 Connect-MgGraph -Scopes 'User.ReadWrite.All'
 
-# add params for jobtitle, department, companyname, manager
-# $params = @{
-# 	companyName = "Microsoft"
-# 	usageLocation = "US"
-# }
-
-# $userId = 'xxxxxxxxxxxxxxxxx'
-
-# Update-MgUser -UserId $userId -BodyParameter $params
