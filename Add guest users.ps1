@@ -48,17 +48,17 @@ function Add-GuestUsers {
     
     # Prompt user for guest properties
     Write-Host "Enter the required properties for a new guest user"
-    $jobTitle = Read-Host "Job title"
-    $companyName = Read-Host "Company name"
-    $department = Read-Host "Department"
-    $managerEmail = Read-Host "Manager email address"
+    do {$jobTitle = Read-Host "Job title"} while ([string]::IsNullOrEmpty($jobTitle))
+    do {$companyName = Read-Host "Company name"} while ([string]::IsNullOrEmpty($companyName))
+    do {$department = Read-Host "Department"} while ([string]::IsNullOrEmpty($department))
+    do {$managerEmail = Read-Host "Manager email address"} while ([string]::IsNullOrEmpty($managerEmail))
 
     $managerId = Get-MgUser -Filter "mail eq '$managerEmail'" | Select-Object -ExpandProperty Id
     if ($null -eq $managerId) {
         Throw "Manager not found for $managerEmail"
     }
     
-    $props = @{
+    $props = [ordered]@{
         jobTitle = $jobTitle
         companyName = $companyName
         department = $department
@@ -77,14 +77,16 @@ function Add-GuestUsers {
     }
     
     # Display table and prompt user for confirmation
+    Write-Host "Properties to add to each user"
+    $props | Format-Table @{Label="Property"; Expression={$_.Name}}, @{Label="Value"; Expression={$_.Value}} -AutoSize | Out-Host
     $confirmationTable | Format-Table -AutoSize | Out-Host
-    $proceed = Read-Host "Enter 'y' to invite these users"
+    $proceed = Read-Host "Enter 'y' to invite these $($params[0].Length) users"
     
     # Create users
     if ($proceed -match '(?i)y') {
         $messageInfo = @{CustomizedMessageBody = "Hello. You are invited to the Contoso organization."}
         foreach ($invitee in $confirmationTable) {
-            Write-host "Sending invitation to $($invitee["Display name"]) at $($invitee["Email address"])"
+            Write-Host "Sending invitation to $($invitee["Display name"]) at $($invitee["Email address"])"
             $invBody = @{
                 'InviteRedirectUrl' = "https://myapps.microsoft.com"
                 'InvitedUserMessageInfo' = "$messageInfo"
