@@ -6,13 +6,16 @@ function Blame-SD {
         )
 
         $userId = (Get-MgUser -Filter  "mail eq '$userEmail'").id
+        $userAuditLog = Get-MgAuditLogDirectoryAudit -Filter "(category eq 'GroupManagement' and targetResources/any(t:t/id eq '$userId'))" 
 
-        Get-MgAuditLogDirectoryAudit -Filter "(category eq 'GroupManagement' and targetResources/any(t:t/id eq '$userId'))" | Select-Object ActivityDateTime, ActivityDisplayName, TargetResources -ExpandProperty TargetResources | Format-Table
-}
+        $userAuditLog | Select-Object @{Name="Time"; Expression={$_.ActivityDateTime}}, `
+        @{Name="Action"; Expression={if ($true) {$_.ActivityDisplayName}}}, `
+        @{Name="Group"; Expression={$_.TargetResources[0].ModifiedProperties.NewValue[1].trim("`"")}}, `
+        @{Name="Target"; Expression={$_.TargetResources[0] | Select-Object -ExpandProperty UserPrincipalName}}, `
+        @{Name="Admin"; Expression={$_.InitiatedBy.User.UserPrincipalName}} | Format-Table -AutoSize
+    }
 
 Connect-MgGraph -Scopes AuditLog.Read.All
 
-# Get-MgAuditLogDirectoryAudit -filter "(activityDisplayName eq 'Add member to group' and targetResources/any(t:t/Id eq '$groupId'))" |
-#  ForEach-Object { $_.TargetResources | Where-Object { $_.Type -eq "User"} | Select-Object Id }
-
-# Get-MgAuditLogDirectoryAudit -filter "(category eq 'GroupManagement' and targetResources/any(t:t/Id eq '349e03e9-1bba-4976-8901-70229c4c0cb3'))"
+# Fix empty group for remove
+# Support UM actions
