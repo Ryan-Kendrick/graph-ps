@@ -6,16 +6,24 @@ function Blame-SD {
         )
 
         $userId = (Get-MgUser -Filter  "mail eq '$userEmail'").id
-        $userAuditLog = Get-MgAuditLogDirectoryAudit -Filter "(category eq 'GroupManagement' and targetResources/any(t:t/id eq '$userId'))" 
+        $userAuditLog = Get-MgAuditLogDirectoryAudit -Filter "(category eq 'GroupManagement' or category eq 'UserManagement') and (targetResources/any(t:t/id eq '$userId'))" 
 
+     
         $userAuditLog | Select-Object @{Name="Time"; Expression={$_.ActivityDateTime}}, `
-        @{Name="Action"; Expression={if ($true) {$_.ActivityDisplayName}}}, `
-        @{Name="Group"; Expression={$_.TargetResources[0].ModifiedProperties.NewValue[1].trim("`"")}}, `
+        @{Name="Action"; Expression={$_.ActivityDisplayName}}, `
+        @{Name="Modified"; Expression={
+            try {
+                $path = $_.TargetResources[0].ModifiedProperties.NewValue[1].trim("`"")
+                return $path
+            } catch {
+            }
+            $path = $_.TargetResources[0].ModifiedProperties.OldValue[1].trim("`"")
+            return $path
+            }}, `
         @{Name="Target"; Expression={$_.TargetResources[0] | Select-Object -ExpandProperty UserPrincipalName}}, `
         @{Name="Admin"; Expression={$_.InitiatedBy.User.UserPrincipalName}} | Format-Table -AutoSize
     }
 
 Connect-MgGraph -Scopes AuditLog.Read.All
 
-# Fix empty group for remove
-# Support UM actions
+# Conditionally add more information for UM actions
