@@ -8,9 +8,6 @@ function Blame-SD {
         $userId = (Get-MgUser -Filter  "mail eq '$userEmail'").id
         $userAuditLog = Get-MgAuditLogDirectoryAudit -Filter "(category eq 'GroupManagement' or category eq 'UserManagement') and (targetResources/any(t:t/id eq '$userId'))" 
 
-        $debug = $userAuditLog.TargetResources[3].ModifiedProperties
-        $debug | ft *
-
         $userAuditLog | Select-Object @{Name="Time"; Expression={$_.ActivityDateTime}}, `
         @{Name="Action"; Expression={$_.ActivityDisplayName}}, `
         @{Name="Changed"; Expression={
@@ -35,3 +32,5 @@ function Blame-SD {
     }
 
 Connect-MgGraph -Scopes AuditLog.Read.All
+
+# Add param for enddate
