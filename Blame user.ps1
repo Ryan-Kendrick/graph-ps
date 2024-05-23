@@ -8,5 +8,9 @@ function Blame-User {
     
 
 }
+# $logs = get-mgauditlogsignin -Filter "startsWith(userPrincipalName, 'ryan')"
+# $logs | Select-Object CreatedDateTime UserDisplayName, AppDisplayName, Status, ConditionalAccessStatus, AppliedConditionalAccessPolicies, Location | ft
+# Expand property location and extract CountryOrRegion
+# Dig into AppliedConditionalAccessPolicies to print DisplayName where Result is failure
 
-Connect-MgGraph -Scopes Directory.Read.All
+Connect-MgGraph -Scopes Directory.Read.All, AuditLog.Read.All, Policy.Read.ConditionalAccess
