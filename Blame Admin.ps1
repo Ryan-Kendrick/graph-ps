@@ -1,4 +1,4 @@
-function Blame-SD {
+function Blame-Admin {
     param(
         [Parameter(Mandatory = $true, HelpMessage = "Email address of the user to fetch audit logs for. Must be in quotes")]
         [ValidateNotNullOrEmpty()]
