@@ -1,10 +1,10 @@
 function Add-UsersToDL {
     param (
-        [Parameter(Mandatory = $true, Position = 1, HelpMessage = "Comma separated list of user email addresses to add to mailbox. Must be in quotes")]
+        [Parameter(Mandatory = $true, Position = 1, HelpMessage = "Comma separated list of user email addresses to add to distribution list. Must be in quotes")]
         [ValidateNotNullOrEmpty()]
         [string]$userEmails,
 
-        [Parameter(Mandatory = $true, Position = 2, HelpMessage = "Single shared mailbox to add users to. Must be in quotes")]
+        [Parameter(Mandatory = $true, Position = 2, HelpMessage = "Single distribution list to add users to. Must be in quotes")]
         [ValidateNotNullOrEmpty()]
         [string]$distributionList
     )
