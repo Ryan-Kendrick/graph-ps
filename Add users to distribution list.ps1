@@ -11,7 +11,7 @@ function Add-UsersToDL {
 
     $userArr = ($userEmails -split ',').Trim()
 
-    # Add each user to the shared mailbox
+    # Add each user to the distribution list
     foreach ($user in $userArr) {
         try {
             Add-DistributionGroupMember -Identity $distributionList -Member $user -BypassSecurityGroupManagerCheck
