@@ -5,7 +5,6 @@ function Blame-User {
         [string]$userEmail
         )
 
-    $userPrincipalName = (Get-MgUser -Filter  "mail eq '$userEmail'").UserPrincipalName
     $userSignInLogs = get-mgauditlogsignin -Filter "UserPrincipalName eq '$userEmail'"
 
     $userSignInLogs | Select-Object @{Name='Date'; Expression={$_.CreatedDateTime}}, `
