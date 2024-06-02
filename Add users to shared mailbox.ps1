@@ -9,24 +9,28 @@ function Add-UsersToSM {
         [string]$mailbox
     )
 
-    Write-Host "Add 'Send as' permission?"
+    $userArr = ($userEmails -split ',').Trim()
+
+    # Prompt user for send permission
+    Write-Host "Add 'Send as' permission for each user?"
     Write-Host "Enter 1 to add sending permission"
     Write-Host "Enter 2 to skip adding sending permission"
+    while ($sendPermission -notmatch "^[12]$") {$sendPermission = Read-Host "Option"}
 
-    while ($sendPermission -notmatch "1|2") {$sendPermission = Read-Host "Option"}
-    
-    if ($sendPermission -eq '1') {
-        $sendPermission = SendAs        
+    if ($sendPermission -eq 1) {
+        $sendPermission = @{AccessRights = SendAs}        
     } else {
-        $sendPermission = $null
+        $sendPermission = @{AccessRights = $null}
     }
-    Write-host "send is $sendPermission"
-    $userArr = ($userEmails -split ',').Trim()
 
     # Add each user to the shared mailbox
     foreach ($user in $userArr) {
-        Add-MailboxPermission -Identity $mailbox -User $user -AccessRights FullAccess -Automapping $true
-        Add-RecipientPermission $mailbox -Trustee $user -AccessRights $sendPermission -Confirm:$false
+        try {
+            Add-MailboxPermission -Identity $mailbox -User $user -AccessRights FullAccess -Automapping $true
+        } catch {
+           Write-Host "Failed to add $user to $mailbox"
+        }
+        Add-RecipientPermission $mailbox -Trustee $user @sendPermission -Confirm:$false
     }
 
     # Display mailbox permissions after change
