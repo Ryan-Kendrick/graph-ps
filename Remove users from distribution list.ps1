@@ -16,7 +16,7 @@ function Remove-UsersFromDL {
         try {
             Remove-DistributionGroupMember -Identity $distributionList -Member $user -BypassSecurityGroupManagerCheck
         } catch {
-           Write-Host "Failed to add $user to $distributionList"
+           Write-Host "Failed to remove $user from $distributionList"
         }
     }
 
