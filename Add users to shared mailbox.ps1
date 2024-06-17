@@ -15,10 +15,10 @@ function Add-UsersToSM {
     Write-Host "Add 'Send as' permission for each user?"
     Write-Host "Enter 1 to add sending permission"
     Write-Host "Enter 2 to skip adding sending permission"
-    while ($sendPermission -notmatch "^[12]$") {$sendPermission = Read-Host "Option"}
+    do {$sendPermission -notmatch "^[12]$"} while ($sendPermission = Read-Host "Option")
 
     if ($sendPermission -eq 1) {
-        $sendPermission = @{AccessRights = SendAs}        
+        $sendPermission = @{AccessRights = 'SendAs'}
     } else {
         $sendPermission = @{AccessRights = $null}
     }
