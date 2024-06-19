@@ -14,7 +14,7 @@ function Add-UsersToDL {
     # Add each user to the distribution list
     foreach ($user in $userArr) {
         try {
-            Add-DistributionGroupMember -Identity $distributionList -Member $user -BypassSecurityGroupManagerCheck
+            Add-DistributionGroupMember -Identity $distributionList -Member $user
         } catch {
            Write-Host "Failed to add $user to $distributionList"
         }
@@ -24,6 +24,6 @@ function Add-UsersToDL {
     Write-Host "Enter 'y' to display all members of $distributionList"
     $displayDL = Read-Host "Continue"
     if ($displayDL -eq "(?i)y") {
-        Get-DistributionGroupMember -Identity $distributionList -ResultSize Unlimited | Select-Object DisplayName, PrimarySmtpAddress, RecipientType
+        Get-DistributionGroupMember -Identity $distributionList -ResultSize Unlimited | Select-Object DisplayName, PrimarySmtpAddress, RecipientType | Format-Table
     } 
 }
