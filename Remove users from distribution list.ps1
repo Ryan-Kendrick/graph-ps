@@ -24,6 +24,7 @@ function Remove-UsersFromDL {
     Write-Host "Enter 'y' to display all members of $distributionList"
     $displayDL = Read-Host "Continue"
     if ($displayDL -eq "(?i)y") {
-        Get-DistributionGroupMember -Identity $distributionList | Select-Object DisplayName, PrimarySmtpAddress, RecipientType | Format-Table
+        $dlPermissions =  Get-DistributionGroupMember -Identity $distributionList -ResultSize Unlimited 
+        $dlPermissions | Select-Object DisplayName, PrimarySmtpAddress, RecipientType | Format-Table    
     } 
 }

@@ -34,5 +34,6 @@ function Add-UsersToSM {
     }
 
     # Display mailbox permissions after change
-    Get-MailboxPermission -Identity $mailbox | Select-Object Identity, User, AccessRights | Format-Table
+    $mailboxPermissions = Get-MailboxPermission -Identity $mailbox 
+    $mailboxPermissions | Select-Object Identity, User, AccessRights | Format-Table
 }
