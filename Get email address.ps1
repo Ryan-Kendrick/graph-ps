@@ -9,29 +9,31 @@ function Get-EmailAddress {
     $emailsArr = @()
     $ambiguousResults = $false
 
-    foreach ($name in $namesArr) {
+    foreach ($providedName in $namesArr) {
 
       # Fetch the email address property for each display name provided
-      $userEmail = (Get-MgUser -Filter  "displayname eq '$name'").mail
+      $user = (Get-MgUser -Filter  "startsWith(DisplayName, '$providedName')" -Limit 3)
+      
 
-      if ($userEmail) {
+      if ($user) {
+        $userEmail = $user.mail
 
         # Add the email address property to the results array as appropriate for one, multiple, or no matches
         if ($userEmail.GetType().name -eq "Object[]") {
           $ambiguousResults = $true
           $emailsArr += [PSCustomObject][Ordered]@{
-            DisplayName = $name
+            DisplayName = $providedName
             EmailAddress = $userEmail -join ', '
           }
         } elseif ($userEmail.GetType().name -eq "String") {
           $emailsArr += [PSCustomObject][Ordered]@{
-            DisplayName = $name
+            DisplayName = $user.DisplayName
             EmailAddress = $userEmail
           }
         }
       } else {
       $emailsArr += [PSCustomObject][Ordered]@{
-        DisplayName = $name
+        DisplayName = $providedName
         EmailAddress = 'not found'
         }
       }
